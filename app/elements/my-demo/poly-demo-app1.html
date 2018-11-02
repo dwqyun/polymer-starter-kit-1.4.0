@@ -1,0 +1,304 @@
+<dom-module id="poly-demo-app">
+  <template>
+    <style>
+      .item {
+        @apply --layout-horizontal;
+        cursor: pointer;
+        background-color: #0b97c4;
+        padding: 16px 22px;
+        border-bottom: 1px solid #DDD;
+      }
+
+      .item:focus,
+      .item.selected:focus {
+        outline: 0;
+        background-color: red;
+      }
+
+      #drawing {
+        text-align: center;
+        width: 500px;
+        height: 500px;
+        border: 1px solid blue;
+        margin: 0 auto;
+        overflow: auto;
+        display: block;
+      }
+
+      body,
+      div,
+      ul,
+      li {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font: 12px/1.5 \5fae\8f6f\96c5\9ed1;
+      }
+
+      ul {
+        list-style-type: none;
+      }
+
+      #menu ul {
+        position: absolute;
+        float: left;
+        border: 1px solid #979797;
+        background: #f1f1f1;
+        padding: 2px;
+        box-shadow: 2px 2px 2px rgba(0, 0, 0, .6);
+        width: 230px;
+        overflow: none;
+      }
+
+      #menu ul li {
+        float: left;
+        clear: both;
+        height: 24px;
+        cursor: pointer;
+        line-height: 24px;
+        white-space: nowrap;
+        padding: 0 30px;
+        width: 100%;
+        display: inline-block;
+      }
+
+      #menu ul li:hover {
+        background: #E6EDF6;
+        border: 1px solid #B4D2F6;
+      }
+
+      .list-contextmenu {
+        display: none;
+        position: fixed;
+        left: 642px;
+        top: 250px;
+        width: 150px;
+        z-index: 99;
+        overflow: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, .15);
+        border-radius: 3px;
+        border: 0;
+        background-color: #fff;
+        background-clip: padding-box;
+        box-sizing: border-box;
+        padding: 8px 0;
+        user-select: none;
+      }
+
+      .list-contextmenu .paper-item-0:hover {
+        background-color: rgba(102, 153, 255);
+      }
+
+      .list-contextmenu .paper-item-0 {
+        min-height: 25px;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 0px 16px 0 0;
+      }
+
+      .list-contextmenu .paper-item-0 .iron-icon-0 {
+        margin-right: 4px;
+        margin-left: 8px;
+        width: 12px;
+        height: 12px;
+      }
+
+    </style>
+    <div id="drawing">
+      <iron-list id="downloads-list" items="{{file_items}}" as="item" on-contextmenu="listOncontextmenu" on-mouseout="listOnmouseout">
+        <template>
+          <downloads-item data="[[item]]" tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]"></downloads-item>
+        </template>
+      </iron-list>
+
+    </div>
+    <div>
+    </div>
+    <div id="menu" class="list-contextmenu">
+      <paper-listbox>
+        <paper-item on-click="listContmenuOpenFolder">
+          <iron-icon icon=""></iron-icon>打开文件夹
+        </paper-item>
+        <paper-item hidden=[[!oncontextmenuItem.isDowloadStatus]] on-click="listContmenuDownload">
+          <iron-icon icon=""></iron-icon>开始
+        </paper-item>
+        <paper-item hidden=[[!oncontextmenuItem.isDowloadStatus]] on-click="listContmenuPause">
+          <iron-icon icon=""></iron-icon>暂停
+        </paper-item>
+
+        <paper-item hidden=[[!oncontextmenuItem.isRubbishStatus]] on-click="listContmenuRevert">
+          <iron-icon icon=""></iron-icon>还原
+        </paper-item>
+        <paper-item hidden=[[!oncontextmenuItem.isRubbishStatus]] on-click="listContmenuClear">
+          <iron-icon icon=""></iron-icon>清空
+        </paper-item>
+
+        <paper-item hidden="[[_contextmenuItemSwitch(oncontextmenuItem.isDowloadStatus,
+          oncontextmenuItem.isCompleteStatus, oncontextmenuItem.hidden)]]"
+          on-click="listContmenuDelete">
+          <iron-icon icon="icons:clear"></iron-icon>删除
+        </paper-item>
+        <paper-item on-click="listContmenuRemove">
+          <iron-icon icon="icons:delete-forever"></iron-icon>彻底删除
+        </paper-item>
+
+        <paper-item hidden="[[_contextmenuItemSwitch(oncontextmenuItem.hidden, oncontextmenuItem.isCompleteStatus,
+          oncontextmenuItem.isRubbishStatus)]]"
+          on-click="listContmenuRenewDownload">
+          <iron-icon icon="icons:refresh"></iron-icon>重新下载
+        </paper-item>
+        <paper-item on-click="listContmenuCopyLink">
+          <iron-icon icon=""></iron-icon>复制磁力链接
+        </paper-item>
+      </paper-listbox>
+    </div>
+
+
+  </template>
+
+</dom-module>
+<script>
+  Polymer({
+    is: 'poly-demo-app',
+    properties: {
+      oncontextmenuItem: {
+        type: Object,
+        value: {
+          isDowloadStatus: false,
+          isCompleteStatus: false,
+          isRubbishStatus: true,
+          hidden: false
+        }
+      },
+
+      file_items: {
+        type: Array,
+        value: [{
+            by_ext_id: "",
+            by_ext_name: "",
+            danger_type: "",
+            date_string: "2018年10月17日",
+            file_externally_removed: false,
+            file_name: "tim_pc.exe",
+            file_path: "C:\Users\sheng\Downloads\tim_pc.exe",
+            file_url: "file:///C:/Users/sheng/Downloads/tim_pc.exe",
+            hideDate: false,
+            id: "0",
+            last_reason_text: "",
+            otr: false,
+            percent: 4,
+            progress_status_text: "165 KB/s - 2.8 MB，共 67.5 MB，还剩 7 分钟",
+            resume: false,
+            retry: false,
+            since_string: "今天",
+            started: 1539744700,
+            state: "IN_PROGRESS",
+            total: 70727032,
+            url: "https://qd.myapp.com/myapp/qqteam/tim/down/tim_pc.exe"
+          },
+          {
+            by_ext_id: "",
+            by_ext_name: "",
+            danger_type: "",
+            date_string: "2018年10月17日",
+            file_externally_removed: false,
+            file_name: "tim_pc.exe",
+            file_path: "C:\Users\sheng\Downloads\tim_pc.exe",
+            file_url: "file:///C:/Users/sheng/Downloads/tim_pc.exe",
+            hideDate: false,
+            id: "1",
+            last_reason_text: "",
+            otr: false,
+            percent: 4,
+            progress_status_text: "165 KB/s - 2.8 MB，共 67.5 MB，还剩 7 分钟",
+            resume: false,
+            retry: false,
+            since_string: "今天",
+            started: 1539744700,
+            state: "IN_PROGRESS",
+            total: 70727032,
+            url: "https://qd.myapp.com/myapp/qqteam/tim/down/tim_pc.exe"
+          },
+          {
+            by_ext_id: "",
+            by_ext_name: "",
+            danger_type: "",
+            date_string: "2018年10月17日",
+            file_externally_removed: false,
+            file_name: "tim_pc.exe",
+            file_path: "C:\Users\sheng\Downloads\tim_pc.exe",
+            file_url: "file:///C:/Users/sheng/Downloads/tim_pc.exe",
+            hideDate: false,
+            id: "2",
+            last_reason_text: "",
+            otr: false,
+            percent: 4,
+            progress_status_text: "165 KB/s - 2.8 MB，共 67.5 MB，还剩 7 分钟",
+            resume: false,
+            retry: false,
+            since_string: "今天",
+            started: 1539744700,
+            state: "IN_PROGRESS",
+            total: 70727032,
+            url: "https://qd.myapp.com/myapp/qqteam/tim/down/tim_pc.exe"
+          },
+
+        ]
+      },
+
+
+    },
+    _contextmenuItemSwitch: function (isDowloadStatus, isCompleteStatus, isRubbishStatus) {
+      console.log(isDowloadStatus, isCompleteStatus, isRubbishStatus)
+      return !(isDowloadStatus || isCompleteStatus || isRubbishStatus);
+    },
+    _computedClass: function (isSelected) {
+      console.log("isSelected", isSelected);
+      var classes = 'item';
+      if (isSelected) {
+        classes += ' selected';
+      }
+      return classes;
+    },
+    show_ad_vip: function (e) {
+      console.log(e);
+    },
+    // state : "":0  待下载 , inprogres:0-100  下载中 ;100  complete:下载完成
+    // percent: 10% 更新下载进度状态
+
+    refreshItemData: function () {
+
+    },
+    opencollapse: function (e) {
+
+    },
+    listOncontextmenu: function (evt) {
+      evt.preventDefault();
+      this.$.menu.style.left = evt.pageX + "px";
+      this.$.menu.style.top = evt.pageY + "px";
+      this.$.menu.style.display = "block";
+      return false;
+    },
+    listOnmouseout: function (evt) {
+      console.log('listOnmouseout')
+      // this.$.menu.style.display = 'none';
+    },
+    ready: function () {
+      var that = this;
+      //实现点击document，自定义菜单消失
+      document.onclick = function () {
+        that.$.menu.style.display = 'none';
+      }
+      this.oncontextmenuItem={
+          isDowloadStatus: true,
+          isCompleteStatus: false,
+          isRubbishStatus: false,
+          hidden: false
+      }
+    }
+
+  });
+
+</script>

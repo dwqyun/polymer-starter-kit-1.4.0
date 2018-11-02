@@ -1,0 +1,98 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-styles/typography.html">
+
+<dom-module id="my-form">
+
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+    </style>
+
+    <form is="iron-form" id="form" method="post" action="/form/handler">
+      <p><code>[0-9a-zA-Z_-]:{{inputVal}}</code></p>
+      <iron-label id="label_1">
+        Data Binding
+        <input id="input_1" is="iron-input" bind-value="{{inputVal}}" allowed-pattern="[0-9a-zA-Z_-]"
+          prevent-invalid-input>
+      </iron-label>
+      <p><code>selected:{{selectVal}}</code></p>
+      <iron-label>
+        select
+        <iron-selector selected="non-existing" bind-value="{{selectVal}}" attr-for-selected="name" fallback-selection="default">
+          <div name="foo">Foo</div>
+          <div name="bar">Bar</div>
+          <div name="baz">Baz</div>
+          <div name="qux">Qux</div>
+          <div name="quux">Quux</div>
+          <div name="default">Default</div>
+        </iron-selector>
+      </iron-label>
+      <div> Employee list: </div>
+      <template is="dom-repeat" id="employeeList" items="{{employees}}">
+        <div>First name: <span>{{item.first}}</span></div>
+        <div>Last name: <span>{{item.last}}</span></div>
+        <button on-click="toggleSelection">Select</button>
+      </template>
+
+      <array-selector id="selector" items="{{employees}}" selected="{{selected}}" multi toggle></array-selector>
+
+      <div> Selected employees: </div>
+      <template is="dom-repeat" items="{{selected}}">
+        <div>First name: <span>{{item.first}}</span></div>
+        <div>Last name: <span>{{item.last}}</span></div>
+      </template>
+    </form>
+
+  </template>
+
+  <script>
+    (function () {
+      'use strict';
+
+      Polymer({
+        is: 'my-form',
+        properties: {
+          items: {
+            type: Array,
+            notify: true
+          },
+          inputVal: {
+            type: String,
+            value: '0'
+          },
+          selectVal: {
+            type: String,
+            value: 'foo'
+          }
+        },
+        ready: function () {
+          this.items = ['A', 'B', 'C'];
+          this.employees = [{
+              first: 'Bob',
+              last: 'Smith'
+            },
+            {
+              first: 'Sally',
+              last: 'Johnson'
+            }
+          ]
+          console.log(this.$.input_1, this.$.label_1);
+        },
+        attached: function () {
+          this.async(() => {
+            console.log(this.$.input_1, this.$.label_1);
+          });
+        },
+        toggleSelection: function (e) {
+          var item = this.$.employeeList.itemForElement(e.target);
+          this.$.selector.select(item);
+        }
+      })
+    })();
+
+  </script>
+
+</dom-module>
